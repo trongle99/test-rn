@@ -5,113 +5,203 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  Button,
+  PermissionsAndroid,
+  Platform,
   StyleSheet,
   Text,
-  useColorScheme,
+  TextInput,
   View,
 } from 'react-native';
 
+import PushNotification from 'react-native-push-notification';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetTextInput,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import DropdownMenu from './components/DropdownMenu';
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  // const cameraRef = useRef<CameraApi>(null);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  // const [cameraType, setCameraType] = useState(CameraType.Back);
+  // const [barcode, setBarcode] = useState<string>('');
+
+  // useEffect(() => {
+  //   const t = setTimeout(() => {
+  //     setBarcode('');
+  //   }, 2000);
+  //   return () => {
+  //     clearTimeout(t);
+  //   };
+  // }, [barcode]);
+
+  // #region WEBSOCKET TEST
+  const [message, setMessage] = useState<string>('');
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  // useEffect(() => {
+  //   (async () => {
+  //     // Request permissions (required for iOS)
+  //     await notifee.requestPermission();
+
+  //     // Create a channel (required for Android)
+  //     await notifee.createChannel({
+  //       id: 'default',
+  //       name: 'Default Channel',
+  //       importance: AndroidImportance.HIGH,
+  //     });
+  //   })();
+
+  //   // Kết nối tới WebSocket server
+  //   const ws = new WebSocket('ws://192.168.1.141:8080');
+
+  //   // Khi kết nối được mở
+  //   ws.onopen = () => {
+  //     console.log('WebSocket connection opened');
+  //     setIsConnected(true);
+  //     // Gửi thông điệp tới server (nếu cần)
+  //     ws.send('Hello Server!');
+  //   };
+
+  //   // Khi nhận được tin nhắn từ server
+  //   ws.onmessage = async event => {
+  //     console.log('Received message:', event.data);
+  //     setMessage(event.data);
+
+  //     // Hiển thị thông báo
+  //     await notifee.displayNotification({
+  //       title: 'New Message',
+  //       body: event.data,
+  //       android: {
+  //         channelId: 'default', // ID của kênh thông báo
+  //         smallIcon: 'ic_launcher', // Ảnh nho nhat
+  //         largeIcon: 'https://cdn-icons-png.flaticon.com/512/0/747.png', // Ảnh đầu nho nhat
+  //         importance: AndroidImportance.HIGH,
+  //       },
+  //     });
+  //   };
+
+  //   // Khi có lỗi xảy ra
+  //   ws.onerror = error => {
+  //     console.log('WebSocket error:', error.message);
+  //     setIsConnected(false);
+  //   };
+
+  //   // Khi kết nối bị đóng
+  //   ws.onclose = () => {
+  //     console.log('WebSocket connection closed');
+  //     setIsConnected(false);
+  //   };
+
+  //   // Đóng kết nối khi component bị unmount
+  //   return () => {
+  //     ws.close();
+  //   };
+  // }, []);
+  // #endregion WEBSOCKET TEST
+
+  // ref
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const bottomSheetModalRef2 = useRef<BottomSheetModal>(null);
+
+  // callbacks
+  const handleExpandPress = useCallback(() => {
+    bottomSheetRef.current?.present();
+  }, []);
+  const handleExpandPress2 = useCallback(() => {
+    bottomSheetModalRef2.current?.present();
+  }, []);
+  const handleClosePress = useCallback(() => {
+    bottomSheetRef.current?.close();
+  }, []);
+  const handleClosePress2 = useCallback(() => {
+    bottomSheetModalRef2.current?.close();
+  }, []);
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={2}
+      />
+    ),
+    [],
+  );
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <GestureHandlerRootView style={{flex: 1}}>
+      <BottomSheetModalProvider>
+        <View style={styles.container}>
+          <View style={{padding: 20}}>
+            <Text>
+              Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
+            </Text>
+            <Text>Message: {message}</Text>
+          </View>
+
+          <DropdownMenu title="Options" position="right">
+            <DropdownMenu.Item onSelect={handleExpandPress}>
+              <Text>Option 1</Text>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onSelect={handleExpandPress2}>
+              <Text>Option 2</Text>
+            </DropdownMenu.Item>
+          </DropdownMenu>
+
+          <Button onPress={handleExpandPress} title="Open" />
+          <Button onPress={handleClosePress} title="Close" />
+          <BottomSheetModal
+            ref={bottomSheetRef}
+            enableDynamicSizing
+            backdropComponent={renderBackdrop}>
+            <BottomSheetView style={styles.body}>
+              <TextInput style={styles.input} placeholder="Field input" />
+
+              <Button onPress={handleExpandPress2} title="Open Modal 2" />
+              <Button onPress={handleClosePress} title="Close" />
+            </BottomSheetView>
+          </BottomSheetModal>
+
+          <BottomSheetModal
+            ref={bottomSheetModalRef2}
+            enableDynamicSizing
+            backdropComponent={renderBackdrop}>
+            <BottomSheetView style={styles.body}>
+              <Text>Modal 2</Text>
+              <Button onPress={handleClosePress2} title="Close Modal 2" />
+            </BottomSheetView>
+          </BottomSheetModal>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  body: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 50,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  input: {
+    borderWidth: 1,
+    borderColor: '#999',
+    backgroundColor: '#dedede',
+    paddingVertical: 3,
+    paddingHorizontal: 7,
   },
 });
 
