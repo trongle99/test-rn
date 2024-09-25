@@ -1,16 +1,24 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import {Portal} from '@gorhom/portal';
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
-  View,
-  Text,
-  Pressable,
-  TouchableOpacity,
-  StyleSheet,
   Animated,
   Dimensions,
   LayoutChangeEvent,
-  ViewStyle,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
   TextStyle,
+  TouchableHighlight,
   TouchableWithoutFeedback,
+  View,
+  ViewStyle,
 } from 'react-native';
 
 interface DropdownMenuProps {
@@ -21,10 +29,6 @@ interface DropdownMenuProps {
   position?: 'left' | 'right';
   children: React.ReactNode;
 }
-
-const DropdownContext = React.createContext<{closeMenu: () => void} | null>(
-  null,
-);
 
 const DropdownMenu: React.FC<DropdownMenuProps> & {Item: typeof Item} = ({
   title,
@@ -58,9 +62,9 @@ const DropdownMenu: React.FC<DropdownMenuProps> & {Item: typeof Item} = ({
   const closeMenu = useCallback(() => {
     Animated.timing(animatedValue, {
       toValue: 0,
-      duration: 150, // Fade out
+      duration: 150,
       useNativeDriver: true,
-    }).start(() => setIsVisible(false)); // Close the menu after fade-out completes
+    }).start(() => setIsVisible(false));
   }, [animatedValue]);
 
   const calculatePosition = useCallback(() => {
@@ -116,38 +120,58 @@ const DropdownMenu: React.FC<DropdownMenuProps> & {Item: typeof Item} = ({
   const opacity = animatedValue;
 
   return (
-    <DropdownContext.Provider value={{closeMenu}}>
-      <>
-        <Pressable ref={triggerRef} onPress={toggleMenu}>
-          <View style={[styles.triggerButton, triggerButtonStyle]}>
-            <Text style={titleStyle}>{title}</Text>
-            {showChevron && <Text>v</Text>}
-          </View>
-        </Pressable>
+    <View>
+      <Pressable ref={triggerRef} onPress={toggleMenu}>
+        <View style={[styles.triggerButton, triggerButtonStyle]}>
+          <Text style={titleStyle}>{title}</Text>
+          {showChevron && <Text>v</Text>}
+        </View>
+      </Pressable>
 
-        {isVisible && (
-          <TouchableWithoutFeedback onPress={closeMenu}>
-            <View style={[StyleSheet.absoluteFill, {zIndex: 9999}]}>
-              <Animated.View
-                ref={menuRef}
-                onLayout={handleMenuLayout}
-                style={[
-                  styles.menu,
-                  {
-                    top: menuPosition.y,
-                    left: menuPosition.x,
-                    opacity, // Fade effect
-                  },
-                ]}>
-                <TouchableWithoutFeedback>
-                  <View>{children}</View>
-                </TouchableWithoutFeedback>
-              </Animated.View>
-            </View>
-          </TouchableWithoutFeedback>
-        )}
-      </>
-    </DropdownContext.Provider>
+      {isVisible && (
+        <SafeAreaView style={{flex: 1}}>
+          <Portal>
+            <TouchableWithoutFeedback onPress={closeMenu}>
+              <View style={[StyleSheet.absoluteFill, {zIndex: 9999}]}>
+                <Animated.View
+                  ref={menuRef}
+                  onLayout={handleMenuLayout}
+                  style={[
+                    styles.menu,
+                    {
+                      top: menuPosition.y,
+                      left: menuPosition.x,
+                      opacity,
+                    },
+                  ]}>
+                  {/* {modalTitle && ( */}
+                  <View
+                    style={[
+                      {
+                        borderBottomWidth: 0.5,
+                        borderColor: '#ccc',
+                        padding: 8,
+                      },
+                    ]}>
+                    <Text>Title</Text>
+                    {/* {subModalTitle && ( */}
+                    <Text>subModalTitle</Text>
+                    {/* )} */}
+                  </View>
+                  {/* )} */}
+
+                  {React.Children.map(children, child =>
+                    React.cloneElement(child as React.ReactElement<any>, {
+                      closeMenu,
+                    }),
+                  )}
+                </Animated.View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Portal>
+        </SafeAreaView>
+      )}
+    </View>
   );
 };
 
@@ -155,20 +179,22 @@ interface ItemProps {
   children: React.ReactNode;
   onSelect: () => void;
   style?: ViewStyle;
+  closeMenu?: () => void;
 }
 
-const Item: React.FC<ItemProps> = ({children, onSelect, style}) => {
-  const dropdownContext = React.useContext(DropdownContext);
-
+const Item: React.FC<ItemProps> = ({children, onSelect, style, closeMenu}) => {
   const handlePress = () => {
     onSelect();
-    dropdownContext?.closeMenu();
+    closeMenu?.();
   };
 
   return (
-    <TouchableOpacity style={[styles.menuOption, style]} onPress={handlePress}>
+    <TouchableHighlight
+      underlayColor="#eee"
+      style={[styles.menuOption, style]}
+      onPress={handlePress}>
       {children}
-    </TouchableOpacity>
+    </TouchableHighlight>
   );
 };
 
@@ -195,9 +221,9 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   menuOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    height: 40,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
   },
 });
 

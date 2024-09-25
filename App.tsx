@@ -5,29 +5,18 @@
  * @format
  */
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {
-  Button,
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import React, {useCallback, useRef, useState} from 'react';
+import {Dimensions, SafeAreaView, StyleSheet} from 'react-native';
 
-import PushNotification from 'react-native-push-notification';
-import notifee, {AndroidImportance} from '@notifee/react-native';
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetTextInput,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import DropdownMenu from './components/DropdownMenu';
+import HomeScreen from './src/screen/HomeScreen';
 
 function App(): React.JSX.Element {
   // const cameraRef = useRef<CameraApi>(null);
@@ -138,52 +127,69 @@ function App(): React.JSX.Element {
     [],
   );
 
+  const Stack = createNativeStackNavigator();
   return (
     <GestureHandlerRootView style={{flex: 1}}>
-      <BottomSheetModalProvider>
-        <View style={styles.container}>
-          <View style={{padding: 20}}>
-            <Text>
-              Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
-            </Text>
-            <Text>Message: {message}</Text>
-          </View>
-
-          <DropdownMenu title="Options" position="right">
-            <DropdownMenu.Item onSelect={handleExpandPress}>
-              <Text>Option 1</Text>
-            </DropdownMenu.Item>
-            <DropdownMenu.Item onSelect={handleExpandPress2}>
-              <Text>Option 2</Text>
-            </DropdownMenu.Item>
-          </DropdownMenu>
-
-          <Button onPress={handleExpandPress} title="Open" />
-          <Button onPress={handleClosePress} title="Close" />
-          <BottomSheetModal
-            ref={bottomSheetRef}
-            enableDynamicSizing
-            backdropComponent={renderBackdrop}>
-            <BottomSheetView style={styles.body}>
-              <TextInput style={styles.input} placeholder="Field input" />
-
-              <Button onPress={handleExpandPress2} title="Open Modal 2" />
-              <Button onPress={handleClosePress} title="Close" />
-            </BottomSheetView>
-          </BottomSheetModal>
-
-          <BottomSheetModal
-            ref={bottomSheetModalRef2}
-            enableDynamicSizing
-            backdropComponent={renderBackdrop}>
-            <BottomSheetView style={styles.body}>
-              <Text>Modal 2</Text>
-              <Button onPress={handleClosePress2} title="Close Modal 2" />
-            </BottomSheetView>
-          </BottomSheetModal>
-        </View>
-      </BottomSheetModalProvider>
+      <SafeAreaView style={{flex: 1}}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Home" component={HomeScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaView>
     </GestureHandlerRootView>
+
+    // <GestureHandlerRootView style={{flex: 1}}>
+    //   <SafeAreaView style={{flex: 1}}>
+    //     <PortalProvider>
+    //       <BottomSheetModalProvider>
+    //         <View style={styles.container}>
+    //           <View style={{padding: 20}}>
+    //             <Text>
+    //               Connection Status:{' '}
+    //               {isConnected ? 'Connected' : 'Disconnected'}
+    //             </Text>
+    //             <Text>Message: {message}</Text>
+    //           </View>
+
+    //           <DropdownMenu title="Options" position="right">
+    //             <DropdownMenu.Item onSelect={handleExpandPress}>
+    //               <Text>Option 1</Text>
+    //             </DropdownMenu.Item>
+    //             <DropdownMenu.Item onSelect={handleExpandPress2}>
+    //               <Text>Option 2</Text>
+    //             </DropdownMenu.Item>
+    //           </DropdownMenu>
+
+    //           <Button onPress={handleExpandPress} title="Open" />
+
+    //           <BottomSheetModal
+    //             ref={bottomSheetRef}
+    //             enableDynamicSizing
+    //             backdropComponent={renderBackdrop}>
+    //             <BottomSheetView style={styles.body}>
+    //               <TextInput style={styles.input} placeholder="Field input" />
+
+    //               <Button onPress={handleExpandPress2} title="Open Modal 2" />
+    //               <Button onPress={handleClosePress} title="Close" />
+    //             </BottomSheetView>
+    //           </BottomSheetModal>
+
+    //           <BottomSheetModal
+    //             ref={bottomSheetModalRef2}
+    //             enableDynamicSizing
+    //             backdropComponent={renderBackdrop}>
+    //             <BottomSheetView style={styles.body}>
+    //               <Text>Modal 2</Text>
+    //               <Button onPress={handleClosePress2} title="Close Modal 2" />
+    //             </BottomSheetView>
+    //           </BottomSheetModal>
+    //         </View>
+    //       </BottomSheetModalProvider>
+    //     </PortalProvider>
+
+    //   </SafeAreaView>
+    // </GestureHandlerRootView>
   );
 }
 
