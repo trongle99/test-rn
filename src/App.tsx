@@ -16,7 +16,10 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import HomeScreen from './src/screen/HomeScreen';
+import {SheetProvider} from 'react-native-actions-sheet';
+import HomeScreen from './screen/HomeScreen';
+import ActionSheetScreen from './screen/ActionSheetScreen';
+import './sheets.tsx';
 
 function App(): React.JSX.Element {
   // const cameraRef = useRef<CameraApi>(null);
@@ -131,11 +134,14 @@ function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaView style={{flex: 1}}>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen name="Home" component={HomeScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <SheetProvider>
+          <NavigationContainer>
+            <Stack.Navigator>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="ActionSheet" component={ActionSheetScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SheetProvider>
       </SafeAreaView>
     </GestureHandlerRootView>
 

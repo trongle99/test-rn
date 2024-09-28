@@ -1,6 +1,8 @@
+import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
+  Button,
   Dimensions,
   FlatList,
   Pressable,
@@ -58,6 +60,8 @@ interface NetPrinterDevice {
 type PrinterDevice = BLEPrinterDevice | NetPrinterDevice;
 
 const HomeScreen = () => {
+  const navigation = useNavigation<any>();
+
   const [printers, setPrinters] = useState<PrinterDevice[]>([]);
   const [selectedPrinter, setSelectedPrinter] = useState<PrinterDevice | null>(
     null,
@@ -162,6 +166,11 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Button
+        title="Go to ActionSheet Screen"
+        onPress={() => navigation.navigate('ActionSheet')}
+      />
+
       <Pressable style={styles.button} onPress={() => scanPrinters('BLE')}>
         <Text style={styles.buttonText}>Quét máy in BLE</Text>
       </Pressable>

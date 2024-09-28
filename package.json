@@ -19,6 +19,7 @@
     "@types/react-native-push-notification": "^8.1.4",
     "react": "18.2.0",
     "react-native": "0.74.3",
+    "react-native-actions-sheet": "^0.9.7",
     "react-native-camera-kit": "^13.0.0",
     "react-native-gesture-handler": "^2.19.0",
     "react-native-push-notification": "^8.1.1",
